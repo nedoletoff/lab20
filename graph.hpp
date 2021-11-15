@@ -2,44 +2,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <vector>
-
-class Graph
-{
-	private:
-		size_t size;
-		size_t visited;
-		size_t start_pos;
-		bool** matrix;
-		bool* points;
-	public:
-		Graph(const std::string file_name);
-		Graph(const Graph& a);
-		Graph& operator=(const Graph& a);
-		~Graph();
-		size_t get_ancestors(size_t p, bool** mas);	
-		size_t get_descendants(size_t p, bool** mas);
-		size_t get_size();
-		size_t get_start_pos();
-		bool is_visited(size_t p);
-		void visit(size_t p);
-	friend std::ostream& operator<<(std::ostream& os, const Graph& value)
-	{
-		os << "start - " << value.start_pos << std::endl;
-		os << "size - " << value.size << std::endl;
-		os << "  ";
-		for (size_t i = 1; i <= value.size; ++i)
-			os << i << " ";
-		for (size_t i = 1; i <= value.size; ++i)
-		{
-			os << std::endl;
-			os << i << " ";
-			for (size_t j = 0; j < value.size; ++j)
-				os << value.matrix[i-1][j] << " ";
-		}
-		return os;
-	}
-};
+#include <list>
 
 struct Pair
 {
@@ -56,9 +19,11 @@ struct Pair
 
 struct Ribs
 {
-	std::vector<Pair> straight_r;
-	std::vector<Pair> back_r;
-	std::vector<Pair> transverse_r;
+	std::list<Pair> straight_r;
+	std::list<Pair> back_r;
+	std::list<Pair> transverse_r;
+
+	void clear();
 
 	friend std::ostream& operator<<(std::ostream& os, const Ribs& value)
 	{
@@ -76,7 +41,41 @@ struct Ribs
 
 };
 
-void dfs(size_t s, Graph& graph, Ribs& ribs);
-
-void get_transverse(Graph& graph, Ribs& ribs);
-
+class Graph
+{
+	private:
+		size_t size;
+		size_t visited;
+		size_t start_pos;
+		bool** matrix;
+		bool* points;
+	public:
+		Graph(const std::string file_name);
+		Graph(const Graph& a);
+		Graph& operator=(const Graph& a);
+		~Graph();
+		size_t get_ancestors(size_t p, std::list<size_t>& mas);
+		size_t get_descendants(size_t p, std::list<size_t>& mas);
+		size_t get_size();
+		size_t get_start_pos();
+		bool is_visited(size_t p);
+		void visit(size_t p);
+		void dfs(size_t s, Ribs& ribs);
+		bool is_all_visited();
+	friend std::ostream& operator<<(std::ostream& os, const Graph& value)
+	{
+		os << "start - " << value.start_pos << std::endl;
+		os << "size - " << value.size << std::endl;
+		os << "  ";
+		for (size_t i = 1; i <= value.size; ++i)
+			os << i << " ";
+		for (size_t i = 1; i <= value.size; ++i)
+		{
+			os << std::endl;
+			os << i << " ";
+			for (size_t j = 0; j < value.size; ++j)
+				os << value.matrix[i-1][j] << " ";
+		}
+		return os;
+	}
+};

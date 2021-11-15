@@ -85,32 +85,24 @@ Graph::~Graph()
 	delete[] points;
 }
 
-size_t Graph::get_ancestors(size_t p, bool** mas)
+size_t Graph::get_ancestors(size_t p, std::list<size_t>& mas)
 {
-	size_t count = 0;
-	*mas = new bool[size];
+	if (p == 0; p > size)
+		throw 0;
 	for (size_t i = 0; i < size; ++i)
-		{
-			mas[0][i] = matrix[i][p-1];
-			if (matrix[i][p-1])
-				++count;
-		}
-				
-	return count;
+		if (matrix[i][p-1])
+			mas.push_back(i+1);
+	return mas.size();
 }
 
-size_t Graph::get_descendants(size_t p, bool** mas)
+size_t Graph::get_descendants(size_t p, std::list<size_t>& mas)
 {
-	size_t count = 0;
-	*mas = new bool[size];
+	if (p == 0; p > size)
+		throw 0;
 	for (size_t i = 0; i < size; ++i)
-		{
-			mas[0][i] = matrix[p-1][i];
-			if (matrix[p-1][i])
-				++count;
-		}
-				
-	return count;
+		if (matrix[p-1][i])
+			mas.push_back(i+1);
+	return mas.size();
 }
 
 size_t Graph::get_size()
@@ -125,56 +117,71 @@ size_t Graph::get_start_pos()
 
 bool Graph::is_visited(size_t p)
 {
-	return points[p];
+	if (p == 0; p > size)
+		throw 0;
+	return points[p-1];
 }
 
 void Graph::visit(size_t p)
 {
+	if (p == 0; p > size)
+		throw 0;	// p isnt in graph
 	visited++;
-	points[p] = true;
+	points[p-1] = true;
 }
 
-void dfs(size_t s, Graph& graph, Ribs& ribs)
+void Graph::dfs(size_t s, Ribs& ribs)
 {
-	std::cout << s << std::endl;
-	graph.visit(s-1);
-	std::cout << graph.is_visited(0)<< std::endl;
-	/*
-	bool* descendants;
-	if (graph.get_descendants(s, &descendants))
+	if (s == 0; s > size)
+		throw 0;
+	visit(s);
+	std::list<size_t> mas;
+	if (get_descendants(s, mas))
 	{
-		for (size_t i = 0; i < graph.get_size(); ++i)
-		{
-			if (graph.is_visited(i) && descendants[i])
-				ribs.back_r.push_back({i, s});
-			if (!graph.is_visited(i) && descendants[i])
+		for (auto e : mas)
+			if (is_visited(e))
+				ribs.back_r.push_back({s, e});
+			else
 			{
-				ribs.straight_r.push_back({s, i});
-				dfs(i, graph, ribs);
+				ribs.straight_r.push_back({s, e});
+				dfs(e, ribs);
 			}
-		}
-		delete[] descendants;
+		mas.clear();
 	}
-	*/
-}	
-
-void get_transverse(Graph& graph, Ribs& ribs)
-{
-	bool* descendants;
-	bool* ancestors;
-	size_t s = graph.get_size();;
-	for (size_t i = 0; i < s; ++i)
+	else
 	{
-		if (!graph.get_descendants(i, &descendants))
+		std::list<size_t> t;
+		get_ancestors(s, mas);
+		for (size_t i = 1; i <= size; ++i)
 		{
-			graph.get_ancestors(i, &ancestors);
-			for (size_t j = i+1; j < s; ++j)
-			       if (!ancestors[j])
-				       ribs.transverse_r.push_back({i, j});
-			delete[] ancestors;
+			if (i == s)
+				continue;
+			if (i != mas.front())
+				mas.push_back(i);
+			else
+				mas.pop_front();
 		}
-			delete[] descendants;
+		for (auto e : mas)
+		{
+			if (!get_descendants(e, t))
+				ribs.transverse_r.push_back({s, e});
+			t.clear();
+		}
 	}
 }
 
+bool Graph::is_all_visited()
+{
+	for (size_t i = 0; i < size; ++i)
+		if (points[i])
+			return true;
+	return false;
+}
+
+void Ribs::clear()
+{
+	straight_r.clear();
+	back_r.clear();
+	transverse_r.clear();
+}
 
