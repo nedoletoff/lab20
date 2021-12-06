@@ -22,8 +22,12 @@ struct Ribs
 	std::list<Pair> straight_r;
 	std::list<Pair> back_r;
 	std::list<Pair> transverse_r;
+	std::list<Pair> r;
 
 	void clear();
+	void create_dot(std::string filename);
+	size_t get_prev(size_t val);
+	size_t get_next(size_t val);
 
 	friend std::ostream& operator<<(std::ostream& os, const Ribs& value)
 	{
@@ -38,7 +42,6 @@ struct Ribs
 			os << e << std::endl;
 		return os;
 	}
-
 };
 
 class Graph
@@ -62,6 +65,7 @@ class Graph
 		void visit(size_t p);
 		void dfs(size_t s, Ribs& ribs);
 		bool is_all_visited();
+
 	friend std::ostream& operator<<(std::ostream& os, const Graph& value)
 	{
 		os << "start - " << value.start_pos << std::endl;

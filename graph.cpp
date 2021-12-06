@@ -3,7 +3,6 @@
 Graph::Graph(const std::string file_name)
 {
 	std::string tresh;
-	char t;
 	std::ifstream file(file_name);
 	if (!file)
 		throw -1;	//file doesnt exist
@@ -136,37 +135,29 @@ void Graph::dfs(size_t s, Ribs& ribs)
 		throw 0;
 	visit(s);
 	std::list<size_t> mas;
+	size_t t = s;
 	if (get_descendants(s, mas))
 	{
 		for (auto e : mas)
+		{
+			t = s;
 			if (is_visited(e))
-				ribs.back_r.push_back({s, e});
+			{
+				while (t != e && t != start_pos)
+				       	t = ribs.get_prev(t);
+				if (t == e)
+					ribs.back_r.push_back({s, e});
+				else
+					if (s != start_pos)
+						ribs.transverse_r.push_back({s, e});
+			}
 			else
 			{
 				ribs.straight_r.push_back({s, e});
 				dfs(e, ribs);
 			}
+		}
 		mas.clear();
-	}
-	else
-	{
-		std::list<size_t> t;
-		get_ancestors(s, mas);
-		for (size_t i = 1; i <= size; ++i)
-		{
-			if (i == s)
-				continue;
-			if (i != mas.front())
-				mas.push_back(i);
-			else
-				mas.pop_front();
-		}
-		for (auto e : mas)
-		{
-			if (!get_descendants(e, t))
-				ribs.transverse_r.push_back({s, e});
-			t.clear();
-		}
 	}
 }
 
@@ -185,3 +176,33 @@ void Ribs::clear()
 	transverse_r.clear();
 }
 
+size_t Ribs::get_prev(size_t val)
+{
+	for (auto e : straight_r)
+		if (val == e.second)
+			return e.first;
+	throw 55;
+}
+
+size_t Ribs::get_next(size_t val)
+{
+	for (auto e : straight_r)
+		if (val == e.first)
+			return e.second;
+	return 0;
+}
+
+void Ribs::create_dot(std::string filename)
+{
+	std::ofstream file(filename);
+	if (!file)
+		throw -1;	//file doesnt exist
+	file << "strict digraph\n{\n";
+	for (Pair e: straight_r)
+		file << e << "[color = red]\n";
+	for (Pair e: back_r)
+		file << e << "[color = orange]\n";
+	for (Pair e: transverse_r)
+		file << e << "[color = yellow]\n";
+	file << "}";
+}

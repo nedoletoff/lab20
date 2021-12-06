@@ -19,6 +19,8 @@ int main()
 	}
 
 	std::cout << r;
+	std::cout << "is every point visited - " << m.is_all_visited() << std::endl;
+	r.create_dot("new.dot");
 	return 0;
 }
 
